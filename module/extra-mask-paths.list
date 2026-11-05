@@ -1,0 +1,7 @@
+com.mobiletools.systemhelper /mi_ext/system/priv-app/com.mobiletools.systemhelper com.mobiletools.systemhelper.apk 42fbfebedd8711b2ca22d3d969324f7ed7c757d838e143bf6cf4d2e8e1ed8556
+com.mobiletools.systemhelper /mnt/vendor/mi_ext/system/priv-app/com.mobiletools.systemhelper com.mobiletools.systemhelper.apk 42fbfebedd8711b2ca22d3d969324f7ed7c757d838e143bf6cf4d2e8e1ed8556
+com.mobiletools.systemhelper /product/pangu/system/priv-app/SystemHelper SystemHelper.apk 1de8d965e295db27e189aa179cdb45438d7f759cffbb43ce55f840b614ff6c65
+com.mobiletools.systemhelper /mi_ext/system/priv-app/SystemHelper SystemHelper.apk e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+com.mobiletools.systemhelper /mnt/vendor/mi_ext/system/priv-app/SystemHelper SystemHelper.apk e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+com.mobiletools.systemhelper /system/priv-app/SystemHelper SystemHelper.apk e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+com.miui.analytics /data/app/vmdl1090565328.tmp m.apk a3656199f013e2f68bc20022f941122a13ce99e33c5df1cef054c9267189d73f

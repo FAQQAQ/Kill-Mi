@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f3f5f8">
+<title>杀死小米</title>
+<style>
+:root{color-scheme:light dark;--bg:#f3f5f8;--card:#fff;--text:#182235;--dim:#667287;--line:#e0e5ed;--accent:#285fe5;--warn:#8a4b00;--warnbg:#fff1d6;--good:#087b52}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,"PingFang SC",sans-serif;padding:24px 16px calc(24px + env(safe-area-inset-bottom));max-width:680px;margin-inline:auto}
+h1{font-size:23px;letter-spacing:-.6px;margin:0}h2{font-size:16px;margin:0 0 10px}p{margin:8px 0}.sub,.hint,small{color:var(--dim);font-size:12px}.targets{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}.targets span{padding:5px 9px;background:var(--card);border:1px solid var(--line);border-radius:20px;font-size:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}.row{display:flex;align-items:center;justify-content:space-between;gap:14px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{background:var(--bg);padding:13px;border-radius:12px}.value{font-size:16px;font-weight:700;margin-top:5px}.good{color:var(--good)}
+button{font:inherit;border:1px solid var(--line);border-radius:11px;padding:10px 13px;background:var(--bg);color:var(--text);cursor:pointer}summary{cursor:pointer;color:var(--dim);font-size:13px}.card[hidden]{display:none}button:disabled{opacity:.45;cursor:wait}button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.switch{position:relative;width:52px;height:30px;padding:0;border:0;border-radius:20px;background:#a5afbf;flex-shrink:0}.switch::after{content:"";position:absolute;top:4px;left:4px;width:22px;height:22px;border-radius:50%;background:white;transition:transform .15s}.switch[aria-checked="true"]{background:var(--accent)}.switch[aria-checked="true"]::after{transform:translateX(22px)}
+.notice{background:var(--warnbg);color:var(--warn);border-radius:12px;padding:12px;margin-top:12px;font-size:13px}.notice[hidden]{display:none}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}textarea,pre{width:100%;font:12px/1.6 ui-monospace,monospace;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:12px;padding:12px;overflow:auto}textarea{resize:vertical;margin-top:10px}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:360px;margin:10px 0 0}.message{font-size:13px;overflow-wrap:anywhere}
+@media(prefers-color-scheme:dark){:root{--bg:#121722;--card:#1c2431;--text:#e6ebf4;--dim:#a7b2c6;--line:#344054;--warn:#ffd18c;--warnbg:#3b2c15;--good:#67ddb0}}
+</style>
+</head>
+<body>
+<header><h1>杀死小米</h1><div class="sub" id="version">连接中…</div></header>
+<section class="card">
+<div class="row"><div><h2>域名屏蔽</h2><div class="hint" id="requested">保存的选择：未知</div></div><button id="toggle" class="switch" role="switch" aria-label="本模块的 hosts 屏蔽" aria-checked="false" disabled></button></div>
+<p class="hint" id="boot">本次启动记录：未知</p><p class="hint" id="reboot">切换后重启生效。</p>
+<div class="notice" id="off" hidden>重启后，本模块的 21 域名屏蔽失效。请复制名单加入自己的屏蔽软件。</div>
+<p class="hint" id="collisionState">其他 hosts 模块：未知</p>
+<div class="notice" id="conflict" hidden>检测到其他 hosts 模块，本模块 hosts 将自动关闭。</div>
+</section>
+<section class="card">
+<div class="row"><span>手机管家组件</span><strong class="value" id="components">未知</strong></div><p class="hint" id="unknown">等待查询</p>
+<div class="row"><span>运营商服务</span><strong id="registration">未知</strong></div>
+<div class="row"><span>统计分析</span><strong id="analytics">未知</strong></div>
+<div class="row"><span>hosts 拦截检测</span><strong id="rules">未知</strong></div>
+<div class="actions"><button class="primary" id="refresh">检测拦截</button><button id="detail">查看详细状态</button><button id="scan">检测相关组件</button></div>
+<p class="message" id="message" role="status" aria-live="polite">正在连接本地模块…</p>
+</section>
+<section class="card">
+<div class="row"><h2>21 个域名</h2><button id="copy">复制名单</button></div>
+<details><summary>查看域名</summary>
+<textarea id="domains" rows="9" readonly spellcheck="false" aria-label="21 个屏蔽域名">flash.sec.miui.com
+api.sec.miui.com
+virus-engine.sec.miui.com
+fraud-detection.engine.miui.com
+detection-aigc.engine.miui.com
+dm.wo.com.cn
+tracking.miui.com
+data.sec.miui.com
+eps.caict.ac.cn
+gateway-papa.cloud.weizhi.com
+api.ad.xiaomi.com
+srv.sec.miui.com
+om.tracking.miui.com
+zzhc.vnet.cn
+typdm.tydevice.com
+framework.sec.miui.com
+tracking.india.miui.com
+tracking.rus.miui.com
+tracking.eu.miui.com
+tracking.intl.miui.com
+pn-tracking-bak.onetrack.mi.com</textarea>
+</details>
+</section>
+<section class="card" id="scanPanel" hidden><details id="scanDetails" open><summary>相关组件检测</summary><p class="hint" id="scanTime"></p><pre id="scanOutput">尚未检测。</pre></details></section>
+<section class="card" id="details" hidden><h2>详细状态</h2><pre id="output">尚未读取。</pre></section>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const COMMANDS=Object.freeze({
+status:'sh "/data/adb/modules/xsof_guard_local/webui.sh" status',
+enable:'sh "/data/adb/modules/xsof_guard_local/webui.sh" set-hosts 1',
+disable:'sh "/data/adb/modules/xsof_guard_local/webui.sh" set-hosts 0',
+detail:'sh "/data/adb/modules/xsof_guard_local/webui.sh" detail',
+scan:'sh "/data/adb/modules/xsof_guard_local/webui.sh" scan'
+});
+let serial=0,busy=false,state=null;
+function message(text){$("message").textContent=String(text).slice(0,1500);}
+function bridge(){return typeof ksu!=="undefined"&&ksu&&typeof ksu.exec==="function";}
+function run(action){
+return new Promise((resolve,reject)=>{
+if(!Object.prototype.hasOwnProperty.call(COMMANDS,action)){reject(new Error("不支持的操作"));return;}
+if(!bridge()){reject(new Error("未连接 WebUI 接口。"));return;}
+const name="__xsof_guard_cb_"+Date.now()+"_"+(++serial);let done=false;
+const finish=(ok,value)=>{if(done)return;done=true;clearTimeout(timer);delete window[name];ok?resolve(value):reject(value);};
+const delay=action==="scan"?50000:30000;
+const timer=setTimeout(()=>finish(false,new Error(action==="scan"?"检测超时。":"操作超时。")),delay);
+window[name]=(code,stdout,stderr)=>{if(code===0||code==="0")finish(true,stdout==null?"":String(stdout));else{const detail=action==="scan"?[stdout,stderr].filter(Boolean).map(String).join("\n"):String(stderr||stdout||"命令失败");finish(false,new Error((detail||"命令失败")+"（退出码 "+code+"）"));}};
+try{ksu.exec(COMMANDS[action],"{}",name);}catch(error){finish(false,error);}
+});
+}
+function kv(raw){const result=Object.create(null);String(raw).split(/\r?\n/).forEach(line=>{const i=line.indexOf("=");if(i>0)result[line.slice(0,i).trim()]=line.slice(i+1).trim();});return result;}
+function bit(value){return value==="0"||value==="1"?Number(value):null;}
+function count(value){return typeof value==="string"&&/^[0-5]$/.test(value)?Number(value):null;}
+function controls(){["refresh","detail","scan"].forEach(id=>$(id).disabled=busy);$("toggle").disabled=busy||!state||state.requested===null;}
+function setBusy(value){busy=value;controls();}
+function render(raw){
+const data=kv(raw);state={requested:bit(data.hosts_requested),boot:bit(data.hosts_boot_mode),reboot:bit(data.reboot_required),rules:bit(data.hosts_rules_ok),disabled:count(data.components_disabled),unknown:count(data.components_unknown),conflicts:bit(data.hosts_conflicts)};
+$("version").textContent=data.version?data.version.slice(0,100):"版本未知";
+$("requested").textContent="保存的选择："+(state.requested===null?"未知":state.requested?"开启":"关闭")+(data.hosts_reason==="auto-conflict"?"（检测冲突后自动关闭）":"");
+$("toggle").setAttribute("aria-checked",state.requested===1?"true":"false");
+$("boot").textContent="本次启动："+(state.boot===null?"未知":state.boot?"开启":"关闭");
+$("reboot").textContent=state.reboot===1?"需要重启。":state.reboot===0?"":"重启后生效。";
+$("off").hidden=state.requested!==0;$("conflict").hidden=state.conflicts!==1;
+$("collisionState").textContent="其他 hosts 模块："+(state.conflicts===null?"未知":state.conflicts?"检测到潜在冲突":"未发现标准 hosts 文件冲突");
+if(state.disabled!==null&&state.unknown!==null&&state.disabled+state.unknown>5){state.disabled=null;state.unknown=null;}
+$("components").textContent=state.disabled===null||state.unknown===null||state.unknown===5?"未知":state.unknown>0?"已确认 "+state.disabled+" 项":state.disabled+" / 5";
+$("components").className="value"+(state.disabled===5&&state.unknown===0?" good":"");
+$("unknown").textContent=state.unknown===null?"无法判定项数未知":state.unknown>0?state.unknown+" 项未知":"";
+const regDisabled=count(data.registration_disabled),regUnknown=count(data.registration_unknown);
+$("registration").textContent=data.registration_mode==="masked"?"已遮蔽":data.registration_mode==="absent"?"未登记":regDisabled!==null&&regUnknown===0&&regDisabled<=3?regDisabled+" / 3":"未知";
+const userCount=value=>typeof value==="string"&&/^[0-9]+$/.test(value)&&Number.isSafeInteger(Number(value))?Number(value):null;
+const analyticsDisabled=userCount(data.analytics_disabled),analyticsTotal=userCount(data.analytics_total),analyticsUnknown=userCount(data.analytics_unknown);
+$("analytics").textContent=data.analytics_mode==="masked"?"已遮蔽":analyticsDisabled!==null&&analyticsTotal!==null&&analyticsUnknown===0&&analyticsDisabled<=analyticsTotal?(analyticsTotal===0?"未登记":analyticsDisabled+" / "+analyticsTotal+" 用户已禁用"):"未知";
+$("rules").textContent=state.rules===null?"未知":state.rules?"21 项映射符合预期":"映射未全部匹配";
+$("rules").className="value";
+controls();return state;
+}
+function invalidate(){render("");$("version").textContent="状态读取失败";}
+async function refresh(){if(busy)return;setBusy(true);try{render(await run("status"));message(state.requested===null?"状态读取失败。":"已刷新。");}catch(error){invalidate();message(error.message||error);}finally{setBusy(false);}}
+async function toggle(){
+if(busy||!state||state.requested===null)return;
+const next=state.requested===1?0:1;
+setBusy(true);
+try{render(await run(next?"enable":"disable"));if(state.requested!==next)throw new Error("未确认设置已保存，请刷新状态核对。");message("设置已保存，请重启手机使挂载生效。");}
+catch(error){const text=String(error.message||error);try{render(await run("status"));message(text+"；已重新读取当前设置。");}catch(_){invalidate();message(text+"；无法重新读取状态，请稍后刷新。");}}
+finally{setBusy(false);}
+}
+async function detail(){if(busy)return;setBusy(true);$("details").hidden=false;try{$("output").textContent=await run("detail");message("已读取详细状态。");}catch(error){$("output").textContent="读取失败："+String(error.message||error);message(error.message||error);}finally{setBusy(false);}}
+async function scan(){
+if(busy)return;setBusy(true);
+$("scanPanel").hidden=false;$("scanDetails").open=true;
+$("scan").textContent="检测中…";$("scanTime").textContent="检测中…";
+$("scanOutput").textContent="检测中…";
+try{$("scanOutput").textContent=await run("scan");$("scanTime").textContent="检测完成 · "+new Date().toLocaleTimeString();message("检测完成。");}
+catch(error){$("scanTime").textContent="检测失败";$("scanOutput").textContent=String(error.message||error);message("检测失败。");}
+finally{$("scan").textContent="检测相关组件";setBusy(false);}
+}
+async function copy(){
+const text=$("domains").value;
+try{if(!navigator.clipboard||!navigator.clipboard.writeText)throw new Error("clipboard unavailable");await navigator.clipboard.writeText(text);message("已复制 21 个域名。");}
+catch(_){const box=$("domains");const panel=box.closest("details");if(panel)panel.open=true;box.focus();box.select();box.setSelectionRange(0,text.length);let copied=false;try{copied=document.execCommand("copy");}catch(__){}message(copied?"已复制 21 个域名。":"已选中域名，请长按后选择复制。");}
+}
+$("refresh").addEventListener("click",refresh);$("detail").addEventListener("click",detail);$("toggle").addEventListener("click",toggle);$("copy").addEventListener("click",copy);$("scan").addEventListener("click",scan);
+refresh();
+</script>
+</body>
+</html>

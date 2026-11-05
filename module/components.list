@@ -1,0 +1,5 @@
+com.miui.securitycenter/com.xiaomi.security.xsof.frauddetection.service.MiFraudDetectionService
+com.miui.securitycenter/com.xiaomi.security.xsof.MiSafetyDetectService
+com.miui.securitycenter/com.xiaomi.security.xsof.frauddetection.provider.FraudDetectionProvider
+com.miui.securitycenter/com.xiaomi.security.xsof.XSOFProvider
+com.miui.securitycenter/com.miui.antifraud.AntiFraudReceiver

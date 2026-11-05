@@ -1,0 +1,9 @@
+.DS_Store
+__MACOSX/
+.git/
+*.zip
+*.tar
+*.tar.gz
+*.log
+__pycache__/
+*.py[cod]

@@ -1,0 +1,3 @@
+com.xiaomi.registration/com.xiaomi.registration.autoregistration.AutoRegReceiver
+com.xiaomi.registration/com.xiaomi.registration.autoregistration.AutoRegIntentService
+com.xiaomi.registration/com.xiaomi.registration.autoregistration.RegistrationJobService
