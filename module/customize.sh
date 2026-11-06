@@ -21,7 +21,7 @@ else
   ui_print "安装诊断脚本缺失，使用系统原始输出继续。"
 fi
 ui_print "========================================"
-ui_print "       Kill Mi  v1.0.1"
+ui_print "       Kill Mi  v1.0.2"
 ui_print "========================================"
 ui_print "运行环境：$ROOT_FRAMEWORK"
 ui_print "安装进程身份：$(id 2>&1)"
