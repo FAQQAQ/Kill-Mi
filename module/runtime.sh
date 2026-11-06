@@ -2,6 +2,21 @@
 # Shared by module entry points and the saved recovery copy.
 # Feed potentially large text through stdin. Android's external printf has a
 # per-argument size limit; shell function arguments do not cross execve.
+# Installation diagnostics are opt-in and never create a runtime log.
+rt_install_exec() {
+  local label="$1"
+  shift
+  if [ "${KI_INSTALL_ACTIVE:-0}" = "1" ]; then ki_run "$label" "$@"
+  else "$@"; fi
+}
+rt_install_write() {
+  if [ "${KI_INSTALL_ACTIVE:-0}" = "1" ]; then ki_write "$@"
+  else printf '%s\n' "$3" > "$2"; fi
+}
+rt_install_error() {
+  if [ "${KI_INSTALL_ACTIVE:-0}" = "1" ]; then ki_issue "$@"; fi
+  return 0
+}
 rt_lines() {
   cat <<__XSOF_RT_LINES__
 $1
