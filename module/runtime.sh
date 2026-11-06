@@ -17,6 +17,22 @@ rt_install_error() {
   if [ "${KI_INSTALL_ACTIVE:-0}" = "1" ]; then ki_issue "$@"; fi
   return 0
 }
+# BusyBox mkdir -p walks absolute paths starting at "/". Some SUSFS create
+# hooks incorrectly return EINVAL for that existing component. Create only
+# missing fixed levels, without -p and without changing the working directory.
+rt_ensure_dir() {
+  local directory="$1" error rc
+  [ -d "$directory" ] && return 0
+  if error=$(mkdir "$directory" 2>&1); then
+    return 0
+  else
+    rc=$?
+    # Another module operation may have created the same directory meanwhile.
+    [ -d "$directory" ] && return 0
+    [ -z "$error" ] || printf '%s\n' "$error" >&2
+    return "$rc"
+  fi
+}
 rt_lines() {
   cat <<__XSOF_RT_LINES__
 $1
