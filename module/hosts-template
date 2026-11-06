@@ -1,7 +1,7 @@
 127.0.0.1 localhost
 ::1 localhost ip6-localhost
 
-# 杀死小米 v1.0.2: exact hostnames only.
+# 杀死小米 v1.0.3: exact hostnames only.
 0.0.0.0 flash.sec.miui.com
 ::1 flash.sec.miui.com
 0.0.0.0 api.sec.miui.com
