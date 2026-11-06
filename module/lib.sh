@@ -9,7 +9,9 @@ rt_setup
 
 init_state() {
   umask 077
-  rt_install_exec "创建原状态与偏好保存目录" mkdir -p "$STATE_DIR/original" "$STATE_DIR/recovery" || return 1
+  rt_install_exec "创建模块状态目录" rt_ensure_dir "$STATE_DIR" || return 1
+  rt_install_exec "创建原状态保存目录" rt_ensure_dir "$STATE_DIR/original" || return 1
+  rt_install_exec "创建恢复脚本目录" rt_ensure_dir "$STATE_DIR/recovery" || return 1
   rt_install_exec "设置保存目录权限（0700）" chmod 0700 "$STATE_DIR" "$STATE_DIR/original" "$STATE_DIR/recovery" || return 1
   rt_install_exec "清理四个旧记录文件" rm -f "$STATE_DIR/events.log" "$STATE_DIR/events.previous.log" \
     "$STATE_DIR/recovery-output.log" "$STATE_DIR/firewall.last" || return 1
