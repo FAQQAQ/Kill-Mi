@@ -9,9 +9,9 @@ rt_setup
 
 init_state() {
   umask 077
-  mkdir -p "$STATE_DIR/original" "$STATE_DIR/recovery" || return 1
-  chmod 0700 "$STATE_DIR" "$STATE_DIR/original" "$STATE_DIR/recovery" || return 1
-  rm -f "$STATE_DIR/events.log" "$STATE_DIR/events.previous.log" \
+  rt_install_exec "创建原状态与偏好保存目录" mkdir -p "$STATE_DIR/original" "$STATE_DIR/recovery" || return 1
+  rt_install_exec "设置保存目录权限（0700）" chmod 0700 "$STATE_DIR" "$STATE_DIR/original" "$STATE_DIR/recovery" || return 1
+  rt_install_exec "清理四个旧记录文件" rm -f "$STATE_DIR/events.log" "$STATE_DIR/events.previous.log" \
     "$STATE_DIR/recovery-output.log" "$STATE_DIR/firewall.last" || return 1
 }
 log_event() {
@@ -19,15 +19,17 @@ log_event() {
 }
 release_lock() {
   if [ "$LOCKED" = "1" ]; then
-    rm -f "$STATE_DIR/lock/pid" "$STATE_DIR/lock/boot"
-    rmdir "$STATE_DIR/lock" 2>/dev/null
+    rt_install_exec "清理模块操作锁记录" rm -f "$STATE_DIR/lock/pid" "$STATE_DIR/lock/boot"
+    rt_install_exec "删除模块操作锁目录" rmdir "$STATE_DIR/lock" 2>/dev/null
     LOCKED=0
   fi
 }
 acquire_lock() {
-  local tries=0 owner saved_boot this_boot
+  local tries=0 owner saved_boot this_boot lock_error lock_rc=0
   this_boot=$(cat /proc/sys/kernel/random/boot_id 2>/dev/null)
-  while ! mkdir "$STATE_DIR/lock" 2>/dev/null; do
+  while :; do
+    if lock_error=$(mkdir "$STATE_DIR/lock" 2>&1); then break
+    else lock_rc=$?; fi
     owner=$(cat "$STATE_DIR/lock/pid" 2>/dev/null)
     saved_boot=$(cat "$STATE_DIR/lock/boot" 2>/dev/null)
     case "$owner" in
@@ -46,12 +48,18 @@ acquire_lock() {
         ;;
     esac
     tries=$((tries + 1))
-    [ "$tries" -ge 30 ] && return 1
+    if [ "$tries" -ge 30 ]; then
+      rt_install_error "获取模块操作锁（已重试 30 次）" "mkdir $STATE_DIR/lock" "$lock_rc" \
+        "$lock_error
+锁目录：$STATE_DIR/lock
+记录的进程：${owner:-未记录}；记录的启动标识：${saved_boot:-未记录}"
+      return 1
+    fi
     sleep 1
   done
   LOCKED=1
-  printf '%s\n' "$this_boot" > "$STATE_DIR/lock/boot"
-  printf '%s\n' "$$" > "$STATE_DIR/lock/pid"
+  rt_install_write "写入锁的启动标识" "$STATE_DIR/lock/boot" "$this_boot"
+  rt_install_write "写入锁的进程号" "$STATE_DIR/lock/pid" "$$"
 }
 wait_pm() {
   local tries=0
