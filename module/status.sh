@@ -3,12 +3,21 @@ MODDIR=${0%/*}
 . "$MODDIR/lib.sh"
 . "$MODDIR/hosts-lib.sh"
 . "$MODDIR/privacy-targets.sh"
-echo "=== 杀死小米 v1.0.2 ==="
+echo "=== 杀死小米 v1.0.3 ==="
 echo "范围：五个独立包优先遮蔽（含已核对来源及开机更新副本）；手机管家 5 组件冻结；21 个精确域名。"
 echo
 [ -f "$MODDIR/disable" ] && echo "模块已停用。"
 [ -f "$MODDIR/remove" ] && echo "模块已标记移除，重启后执行恢复。"
 sh "$MODDIR/mask-status.sh"
+echo
+if [ -f "$MODDIR/mount-diagnose.sh" ]; then
+  if sh "$MODDIR/mount-diagnose.sh"; then :; else
+    diagnostic_result=$?
+    echo "挂载诊断未完成（退出码 ${diagnostic_result}）"
+  fi
+else
+  echo "挂载诊断脚本缺失。"
+fi
 echo
 echo "--- 组件当前状态 ---"
 if load_dump; then
