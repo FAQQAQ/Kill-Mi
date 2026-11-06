@@ -21,7 +21,7 @@ else
   ui_print "安装诊断脚本缺失，使用系统原始输出继续。"
 fi
 ui_print "========================================"
-ui_print "       Kill Mi  v1.0.2"
+ui_print "       Kill Mi  v1.0.3"
 ui_print "========================================"
 ui_print "运行环境：$ROOT_FRAMEWORK"
 ui_print "安装进程身份：$(id 2>&1)"
@@ -52,7 +52,7 @@ ki_stage "设置模块文件权限"
 set_perm_recursive "$MODPATH" 0 0 0755 0644
 ki_perm_rc=$?
 [ "$ki_perm_rc" -eq 0 ] || ki_issue "设置模块目录与文件权限" "set_perm_recursive $MODPATH 0 0 0755 0644" "$ki_perm_rc" "框架权限函数失败，系统原始输出见上方。"
-for script in firewall.sh post-fs-data.sh service.sh action.sh status.sh uninstall.sh recover.sh mask-status.sh hosts-conflicts.sh webui.sh scan.sh privacy-targets.sh data-mask.sh package-state.sh; do
+for script in firewall.sh post-fs-data.sh service.sh action.sh status.sh uninstall.sh recover.sh mask-status.sh mount-diagnose.sh hosts-conflicts.sh webui.sh scan.sh privacy-targets.sh data-mask.sh package-state.sh; do
   set_perm "$MODPATH/$script" 0 0 0755
   ki_perm_rc=$?
   [ "$ki_perm_rc" -eq 0 ] || ki_issue "设置可执行脚本权限" "set_perm $MODPATH/$script 0 0 0755" "$ki_perm_rc" "框架权限函数失败，系统原始输出见上方。"
