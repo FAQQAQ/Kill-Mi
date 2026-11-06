@@ -11,7 +11,7 @@ service_cleanup() {
 }
 trap service_cleanup EXIT
 trap 'exit 0' INT TERM
-log_event "START v1.0.1 ; user=0"
+log_event "START v1.0.2 ; user=0"
 wait_pm || log_event "WAIT package service timeout ; retrying"
 while [ -d "$MODDIR" ]; do
   if [ -f "$MODDIR/disable" ] || [ -f "$MODDIR/remove" ] ||
