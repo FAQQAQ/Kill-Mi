@@ -25,7 +25,7 @@ print_web_status() {
   else unknown=5; fi
   reason=$(cat "$STATE_DIR/hosts.reason" 2>/dev/null)
   case "$reason" in auto-conflict|invalid-config|user) ;; *) reason=none ;; esac
-  echo "version=v1.0.0"
+  echo "version=v1.0.1"
   echo "hosts_requested=$requested"
   echo "hosts_boot_mode=$boot"
   echo "reboot_required=$needed"
