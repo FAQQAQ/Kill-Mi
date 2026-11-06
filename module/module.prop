@@ -1,6 +1,6 @@
 id=xsof_guard_local
 name=Kill Mi
-version=v1.0.1
-versionCode=11004
+version=v1.0.2
+versionCode=11005
 author=GitHub:FAQQAQ 酷安:不想想这名字
 description=五个独立包优先遮蔽，覆盖已核对预置来源及开机更新副本；手机管家五组件冻结；21域名hosts及开关；独立UID后台后备拦截；WebUI状态查看。
