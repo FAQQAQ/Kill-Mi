@@ -3,7 +3,7 @@ MODDIR=${0%/*}
 . "$MODDIR/lib.sh"
 . "$MODDIR/hosts-lib.sh"
 . "$MODDIR/privacy-targets.sh"
-echo "=== 杀死小米 v1.0.1 ==="
+echo "=== 杀死小米 v1.0.2 ==="
 echo "范围：五个独立包优先遮蔽（含已核对来源及开机更新副本）；手机管家 5 组件冻结；21 个精确域名。"
 echo
 [ -f "$MODDIR/disable" ] && echo "模块已停用。"
