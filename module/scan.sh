@@ -86,6 +86,15 @@ sh "$MODDIR/mask-status.sh"
 echo
 pt_detail
 echo
+if [ -f "$MODDIR/mount-diagnose.sh" ]; then
+  if sh "$MODDIR/mount-diagnose.sh"; then :; else
+    diagnostic_result=$?
+    echo "挂载诊断未完成（退出码 ${diagnostic_result}）"
+  fi
+else
+  echo "挂载诊断脚本缺失。"
+fi
+echo
 echo "--- 名称匹配 ---"
 scan_root() {
   local root="$1" depth="$2" output code candidates count item metadata
