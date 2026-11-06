@@ -66,7 +66,7 @@ hg_prepare_payload() {
         rt_install_error "关闭 hosts 屏蔽" "检查路径 $destination" 1 "目标 hosts 存在，但不是普通文件。"
         return 1
       }
-      rt_install_exec "创建 hosts 停用目录" mkdir -p "$MODDIR/disabled-payload" || return 1
+      rt_install_exec "创建 hosts 停用目录" rt_ensure_dir "$MODDIR/disabled-payload" || return 1
       rt_install_exec "移出模块 hosts 文件" mv -f "$destination" "$MODDIR/disabled-payload/hosts" || return 1
     fi
     if [ ! -e "$destination" ] && [ ! -L "$destination" ]; then return 0; fi
@@ -82,7 +82,8 @@ hg_prepare_payload() {
   else
     awk -f "$MODDIR/check-hosts.awk" "$MODDIR/domains.list" "$MODDIR/hosts-template" >/dev/null || return 1
   fi
-  rt_install_exec "创建模块 hosts 目录" mkdir -p "$MODDIR/system/etc" || return 1
+  rt_install_exec "创建模块 system 目录" rt_ensure_dir "$MODDIR/system" || return 1
+  rt_install_exec "创建模块 hosts 目录" rt_ensure_dir "$MODDIR/system/etc" || return 1
   [ ! -L "$destination" ] || {
     rt_install_error "准备 hosts 文件" "检查路径 $destination" 1 "目标 hosts 是符号链接。"
     return 1
