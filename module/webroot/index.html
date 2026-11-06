@@ -30,7 +30,7 @@ button{font:inherit;border:1px solid var(--line);border-radius:11px;padding:10px
 <div class="row"><span>运营商服务</span><strong id="registration">未知</strong></div>
 <div class="row"><span>统计分析</span><strong id="analytics">未知</strong></div>
 <div class="row"><span>hosts 拦截检测</span><strong id="rules">未知</strong></div>
-<div class="actions"><button class="primary" id="refresh">检测拦截</button><button id="detail">查看详细状态</button><button id="scan">检测相关组件</button></div>
+<div class="actions"><button class="primary" id="refresh">检测拦截</button><button id="detail">查看详细状态</button><button id="scan">检测组件与挂载</button></div>
 <p class="message" id="message" role="status" aria-live="polite">正在连接本地模块…</p>
 </section>
 <section class="card">
@@ -59,8 +59,8 @@ tracking.intl.miui.com
 pn-tracking-bak.onetrack.mi.com</textarea>
 </details>
 </section>
-<section class="card" id="scanPanel" hidden><details id="scanDetails" open><summary>相关组件检测</summary><p class="hint" id="scanTime"></p><pre id="scanOutput">尚未检测。</pre></details></section>
-<section class="card" id="details" hidden><h2>详细状态</h2><pre id="output">尚未读取。</pre></section>
+<section class="card" id="scanPanel" hidden><details id="scanDetails" open><summary>相关组件与挂载诊断</summary><div class="row"><p class="hint" id="scanTime"></p><button id="copyScan" disabled>复制结果</button></div><pre id="scanOutput">尚未检测。</pre></details></section>
+<section class="card" id="details" hidden><div class="row"><h2>详细状态</h2><button id="copyDetail" disabled>复制结果</button></div><pre id="output">尚未读取。</pre></section>
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
@@ -72,6 +72,7 @@ detail:'sh "/data/adb/modules/xsof_guard_local/webui.sh" detail',
 scan:'sh "/data/adb/modules/xsof_guard_local/webui.sh" scan'
 });
 let serial=0,busy=false,state=null;
+const reportReady={output:false,scanOutput:false};
 function message(text){$("message").textContent=String(text).slice(0,1500);}
 function bridge(){return typeof ksu!=="undefined"&&ksu&&typeof ksu.exec==="function";}
 function run(action){
@@ -80,7 +81,7 @@ if(!Object.prototype.hasOwnProperty.call(COMMANDS,action)){reject(new Error("不
 if(!bridge()){reject(new Error("未连接 WebUI 接口。"));return;}
 const name="__xsof_guard_cb_"+Date.now()+"_"+(++serial);let done=false;
 const finish=(ok,value)=>{if(done)return;done=true;clearTimeout(timer);delete window[name];ok?resolve(value):reject(value);};
-const delay=action==="scan"?50000:30000;
+const delay=action==="scan"?50000:action==="detail"?60000:30000;
 const timer=setTimeout(()=>finish(false,new Error(action==="scan"?"检测超时。":"操作超时。")),delay);
 window[name]=(code,stdout,stderr)=>{if(code===0||code==="0")finish(true,stdout==null?"":String(stdout));else{const detail=action==="scan"?[stdout,stderr].filter(Boolean).map(String).join("\n"):String(stderr||stdout||"命令失败");finish(false,new Error((detail||"命令失败")+"（退出码 "+code+"）"));}};
 try{ksu.exec(COMMANDS[action],"{}",name);}catch(error){finish(false,error);}
@@ -89,7 +90,7 @@ try{ksu.exec(COMMANDS[action],"{}",name);}catch(error){finish(false,error);}
 function kv(raw){const result=Object.create(null);String(raw).split(/\r?\n/).forEach(line=>{const i=line.indexOf("=");if(i>0)result[line.slice(0,i).trim()]=line.slice(i+1).trim();});return result;}
 function bit(value){return value==="0"||value==="1"?Number(value):null;}
 function count(value){return typeof value==="string"&&/^[0-5]$/.test(value)?Number(value):null;}
-function controls(){["refresh","detail","scan"].forEach(id=>$(id).disabled=busy);$("toggle").disabled=busy||!state||state.requested===null;}
+function controls(){["refresh","detail","scan"].forEach(id=>$(id).disabled=busy);$("toggle").disabled=busy||!state||state.requested===null;$("copyDetail").disabled=busy||!reportReady.output;$("copyScan").disabled=busy||!reportReady.scanOutput;}
 function setBusy(value){busy=value;controls();}
 function render(raw){
 const data=kv(raw);state={requested:bit(data.hosts_requested),boot:bit(data.hosts_boot_mode),reboot:bit(data.reboot_required),rules:bit(data.hosts_rules_ok),disabled:count(data.components_disabled),unknown:count(data.components_unknown),conflicts:bit(data.hosts_conflicts)};
@@ -123,15 +124,28 @@ try{render(await run(next?"enable":"disable"));if(state.requested!==next)throw n
 catch(error){const text=String(error.message||error);try{render(await run("status"));message(text+"；已重新读取当前设置。");}catch(_){invalidate();message(text+"；无法重新读取状态，请稍后刷新。");}}
 finally{setBusy(false);}
 }
-async function detail(){if(busy)return;setBusy(true);$("details").hidden=false;try{$("output").textContent=await run("detail");message("已读取详细状态。");}catch(error){$("output").textContent="读取失败："+String(error.message||error);message(error.message||error);}finally{setBusy(false);}}
+async function detail(){if(busy)return;reportReady.output=false;setBusy(true);$("details").hidden=false;$("output").textContent="读取中…";try{$("output").textContent=await run("detail");message("已读取详细状态。");}catch(error){$("output").textContent="读取失败："+String(error.message||error);message(error.message||error);}finally{reportReady.output=true;setBusy(false);}}
 async function scan(){
-if(busy)return;setBusy(true);
+if(busy)return;reportReady.scanOutput=false;setBusy(true);
 $("scanPanel").hidden=false;$("scanDetails").open=true;
 $("scan").textContent="检测中…";$("scanTime").textContent="检测中…";
 $("scanOutput").textContent="检测中…";
 try{$("scanOutput").textContent=await run("scan");$("scanTime").textContent="检测完成 · "+new Date().toLocaleTimeString();message("检测完成。");}
 catch(error){$("scanTime").textContent="检测失败";$("scanOutput").textContent=String(error.message||error);message("检测失败。");}
-finally{$("scan").textContent="检测相关组件";setBusy(false);}
+finally{reportReady.scanOutput=true;$("scan").textContent="检测组件与挂载";setBusy(false);}
+}
+async function copyReport(id){
+if(busy||!reportReady[id])return;
+const text=$(id).textContent||"";
+if(!text){message("尚无可复制结果。");return;}
+try{if(!navigator.clipboard||!navigator.clipboard.writeText)throw new Error("clipboard unavailable");await navigator.clipboard.writeText(text);message("已复制检测结果。");}
+catch(_){
+const box=document.createElement("textarea");box.value=text;box.readOnly=true;box.setAttribute("aria-hidden","true");box.style.position="fixed";box.style.opacity="0";box.style.pointerEvents="none";
+document.body.appendChild(box);let copied=false;
+try{box.focus();box.select();box.setSelectionRange(0,text.length);copied=typeof document.execCommand==="function"&&document.execCommand("copy");}catch(__){}
+finally{box.remove();}
+message(copied?"已复制检测结果。":"复制失败，请长按检测结果复制。");
+}
 }
 async function copy(){
 const text=$("domains").value;
@@ -139,6 +153,7 @@ try{if(!navigator.clipboard||!navigator.clipboard.writeText)throw new Error("cli
 catch(_){const box=$("domains");const panel=box.closest("details");if(panel)panel.open=true;box.focus();box.select();box.setSelectionRange(0,text.length);let copied=false;try{copied=document.execCommand("copy");}catch(__){}message(copied?"已复制 21 个域名。":"已选中域名，请长按后选择复制。");}
 }
 $("refresh").addEventListener("click",refresh);$("detail").addEventListener("click",detail);$("toggle").addEventListener("click",toggle);$("copy").addEventListener("click",copy);$("scan").addEventListener("click",scan);
+$("copyDetail").addEventListener("click",()=>copyReport("output"));$("copyScan").addEventListener("click",()=>copyReport("scanOutput"));
 refresh();
 </script>
 </body>
